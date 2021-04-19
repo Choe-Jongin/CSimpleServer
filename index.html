@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Computer Network Project 1</title>
+
+    <script type="text/javascript">
+        window.onload = function () {
+            var header = document.getElementById('btn_send');
+            header.onclick = function () {
+                var choices = document.getElementsByName("choice")
+                choices.forEach(function (item) {
+                    if (item.checked == true) {
+                        console.log(item.value);
+                        alert(item.value);
+                    }
+                });
+            }
+        };
+    </script>
+</head>
+
+<body>
+
+    <img src="logo.png" alt="ha nyang E">
+    </br>
+    <label for="msg">Choose the file you want</label>
+
+    <h6><input type="radio" name="choice" value="picture" checked="checked">1. picture</h6>
+    <h6><input type="radio" name="choice" value="text">2. text</h6>
+    <h6><input type="radio" name="choice" value="shutdown">3. shut down the server</h6>
+
+    <button id="btn_send" type="button">Send</button>
+
+</body>
+
+</html>
