@@ -117,8 +117,8 @@ void request_hendler(void *arg)
 
 	strcpy(request, req_line);
     strcpy(method, strtok(req_line, " /"));
-    strcpy(file_name, strtok(NULL, " /"));
-    strcpy(httpver, strtok(NULL, " /"));
+    strcpy(file_name, strtok(NULL, " HTTP/"));
+    strcpy(httpver, strtok(NULL, " "));
     strcpy(ct, content_type(file_name));
 
     sprintf(tempstr, "req line  : %s", request);
@@ -165,7 +165,7 @@ void send_data(FILE *fp, char *ct, char *filename)
 
     char protocol[100] = "HTTP/1.0 200 OK\r\n";
     char server[100] = "Serve:Linux Web Server \r\n";
-    char cnt_len[100] = "Content-length:2048\r\n";
+    char cnt_len[100] = "Content-Length:2048\r\n";
     char cnt_type[100];
     char buf[1024];
     FILE *send_file;
@@ -177,7 +177,7 @@ void send_data(FILE *fp, char *ct, char *filename)
 	if(strcmp("image",strtok(strtype,"/")) == 0 )
 		type = 0;
 
-    sprintf(cnt_type, "Content-type:%s\r\n\r\n", ct);
+    sprintf(cnt_type, "Content-Type:%s\r\n", ct);
     if( type == 0 )
 		send_file = fopen(filename, "r");
 	else
@@ -188,12 +188,17 @@ void send_data(FILE *fp, char *ct, char *filename)
         sprintf(tempstr, "[%s] not found", filename);
         printf("%s\n", matchformat(tempstr));
         send_file = fopen("Error.html", "r");
-        sprintf(cnt_type, "Content-type:%s\r\n", "text/html");
+        sprintf(cnt_type, "Content-Type:%s\r\n", "text/html");
         code = 404;
     }
 
+    fseek(send_file, 0, SEEK_END);
+    length = ftell(send_file);
+    fseek(send_file, 0, SEEK_SET);
+
+
     sprintf(protocol, "HTTP/1.0 %d OK\r\n", code);
-    sprintf(cnt_len, "Content-length:%d\r\n", length);
+    sprintf(cnt_len, "Content-Length:%d\r\n", length);
 
     sprintf(tempstr, "StateCode : %d", code);
     printf("%s\n", matchformat(tempstr));
@@ -207,14 +212,28 @@ void send_data(FILE *fp, char *ct, char *filename)
     fputs(cnt_len, fp);
     fputs(cnt_type, fp);
     fputs("\r\n", fp);
-    while (fgets(buf, 1024, send_file) != NULL)
+    
+    if(type == 0) 
     {
-        fputs(buf, fp);
+        fread(buf, sizeof(char), length, send_file);
+        for(int i=0; i<length; ++i) 
+        {
+			if( i%1024 == 0 )
+			fflush(fp);
+			fputc(buf[i], fp);	
+		}
+	}
+    else
+    {
+        while (fgets(buf, 1024, send_file) != NULL)
+        {
+            fputs(buf, fp);
+            fflush(fp);
+        }
         fflush(fp);
     }
+    
     fflush(fp);
-    fflush(fp);
-
 	fclose(send_file);
 }
 
