@@ -13,6 +13,7 @@
 #define BACKLOG 10
 #define MAX_STRING_LEN 60
 #define CHSIZE 4
+#define BUFF_SIZE 1024
 //#define CHSIZE sizeof("─")
 
 void request_hendler(void *arg);
@@ -91,8 +92,8 @@ int main(int argc, char *argv[])
 void request_hendler(void *arg)
 {
     int clnt_sock = *((int *)arg);
-    char request[1024];
-    char req_line[1024];
+    char request[BUFF_SIZE];
+    char req_line[BUFF_SIZE];
     FILE *clnt_read;
     FILE *clnt_write;
 
@@ -104,7 +105,7 @@ void request_hendler(void *arg)
 
     clnt_read = fdopen(clnt_sock, "r");
     clnt_write = fdopen(dup(clnt_sock), "w");
-    fgets(req_line, 1024, clnt_read);
+    fgets(req_line, BUFF_SIZE, clnt_read);
     if (strstr(req_line, "HTTP/") == NULL)
     {
         fclose(clnt_read);
@@ -152,6 +153,8 @@ void request_hendler(void *arg)
     {    
 		send_data(clnt_write, ct, file_name);
     }
+    
+    fclose(clnt_write);
 }
 
 void send_data(FILE *fp, char *ct, char *filename)
@@ -167,7 +170,7 @@ void send_data(FILE *fp, char *ct, char *filename)
     char server[100] = "Serve:Linux Web Server \r\n";
     char cnt_len[100] = "Content-Length:2048\r\n";
     char cnt_type[100];
-    char buf[1024];
+    char buf[BUFF_SIZE];
     FILE *send_file;
 
     char tempstr[MAX_STRING_LEN * CHSIZE];
@@ -215,25 +218,26 @@ void send_data(FILE *fp, char *ct, char *filename)
     
     if(type == 0) 
     {
-        fread(buf, sizeof(char), length, send_file);
-        for(int i=0; i<length; ++i) 
+        for(int i=0; i<=length/BUFF_SIZE; ++i) 
         {
-			if( i%1024 == 0 )
+            fread(buf, sizeof(char), BUFF_SIZE, send_file);
+            for( int j = 0 ; j < BUFF_SIZE ; ++j )
+			    fputc(buf[j], fp);	
 			fflush(fp);
-			fputc(buf[i], fp);	
 		}
 	}
     else
     {
-        while (fgets(buf, 1024, send_file) != NULL)
+        while (fgets(buf, BUFF_SIZE, send_file) != NULL)
         {
             fputs(buf, fp);
             fflush(fp);
         }
-        fflush(fp);
     }
     
     fflush(fp);
+    fflush(fp);
+
 	fclose(send_file);
 }
 
