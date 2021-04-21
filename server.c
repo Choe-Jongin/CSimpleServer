@@ -16,6 +16,7 @@
 #define BUFF_SIZE 1024
 //#define CHSIZE sizeof("─")
 
+char * Jstrtok( char * str, const char * tok );
 void request_hendler(void *arg);
 void send_data(FILE *file, char *ct, char *filename);
 char *content_type(char *file);
@@ -106,7 +107,8 @@ void request_hendler(void *arg)
     clnt_read = fdopen(clnt_sock, "r");
     clnt_write = fdopen(dup(clnt_sock), "w");
     fgets(req_line, BUFF_SIZE, clnt_read);
-    if (strstr(req_line, "HTTP/") == NULL)
+	strcpy(request, req_line);
+    if (strstr(request, "HTTP/") == NULL)
     {
         fclose(clnt_read);
         fclose(clnt_write);
@@ -116,10 +118,9 @@ void request_hendler(void *arg)
         return;
     }
 
-	strcpy(request, req_line);
-    strcpy(method, strtok(req_line, " /"));
-    strcpy(file_name, strtok(NULL, " HTTP/"));
-    strcpy(httpver, strtok(NULL, " "));
+    strcpy(method, Jstrtok(req_line, " /"));
+    strcpy(file_name, Jstrtok(NULL, " HTTP/"));
+    strcpy(httpver, Jstrtok(NULL, " "));
     strcpy(ct, content_type(file_name));
 
     sprintf(tempstr, "req line  : %s", request);
@@ -304,3 +305,39 @@ char *strHorLine()
 
     return line;
 }
+// 내가 만든 strtok(문자열 토큰 가능)
+char * Jstrtok( char * str, const char * tok )
+{
+    static char * strpos = NULL; 
+
+    if( str == NULL )
+        str = strpos;
+    else
+        strpos = str;
+
+    if( str == NULL)
+        return NULL;
+
+    int len = strlen(str);
+    int toklen = strlen(tok);
+
+    for( int i = 0 ; i <= len - toklen ; i++)
+    {
+        int matched = 0;
+        for( int j = 0 ; j < toklen ; j++ )
+        {
+            if( str[i+j] == tok[j] )
+                matched++;
+        }
+
+        if( matched == toklen )
+        {
+            for( int j = 0 ; j < toklen ; j++ )
+                str[i+j] = (char)NULL;
+            strpos = str + i + toklen;    
+            return str;
+        }
+    }
+    strpos = NULL;
+    return str;
+} 
