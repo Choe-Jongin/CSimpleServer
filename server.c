@@ -245,9 +245,8 @@ void send_data(FILE *fp, char *ct, char *filename)
     }
     
     fflush(fp);
-    fflush(fp);
 
-	fclose(send_file);
+    fclose(send_file);
 }
 
 //for http header
