@@ -8,7 +8,7 @@
 <style>
   body{
     text-align :   left;
-    margin: 10%;
+    margin: 15%;
   }
 </style>
 
@@ -18,46 +18,128 @@
   <h1 align = "center">컴퓨터 네트워크 Project 1 보고서</h1>
   <h3 align = "right" >2018045196 최종인</h3>
 
-  </br>
+  <br>
 
   <p>
   <hr style="border: solid 1px black; width: 100%;">
   <h2>개요</h2>
 
-  2021년 4월 23일까지 리눅스 상에서 구동되는 웹서버를 C/C++로 개발.
-  서버는 다음의 두가지 기능을 해야함</br>
-  A. HTTP리퀘스트가 들어오면 해당 패킷을 화면에 출력</br>
-  B. 파일요청이 있었다면 해당 파일을 클라이언트에게 HTTP로 응답</br>
+  2021년 4월 23일까지 리눅스 상에서 구동되는 웹서버를 C/C++로 구현.<br>
+  서버는 다음의 두가지 기능을 해야함.<br>
+  <p>
+    A. HTTP리퀘스트가 들어오면 해당 패킷을 화면에 출력<br>
+    B. 파일요청이 있었다면 해당 파일을 클라이언트에게 HTTP로 응답<br>
+  </p>
 
-  Ubuntu 18.04 LTS에서 GCC로 서버를 작성하였음
+  Ubuntu 18.04 LTS에서 GCC로 서버를 작성하였음<br>
+  단, 우분투 상에서는 레포트 작성에 어려움이 있어 스크린 캡쳐와 문서 작성등은 <b>macOS Big Sur(ver 11.2.3)</b>에서 진행하였음
 
   </p>
   
   <p>
   <hr style="border: solid 1px black; width: 100%;">
   <h2>구현 현황</h2>
+  <div style="text-align: center;">
+    <img src="parta.png" alt="parta", width="65%">
+    <br>Part A
+  </div>
+  서버의 콘솔화면이다.<br>
+  네모난 박스는 적절한 공백을 문자열 뒤에 추가하여 자동으로 간격이 맞춰지도록 구현하였다. 만약 박스의 넓이를 넓히고 싶다면 서버 코드 상단에 MAX_STRING_LEN 을 60보다 큰 값으로 define하면 된다.<br>
+  서버는 ./myserver를 통해 실행 시킬 수 있으며 기본 포트 번호는 3490이다.<br>
+  만약 다른 포트번호를 사용하고 싶다면 ./myserver {[1024~65335]}로 입력하면 된다.<br><br>
+   accept가 되고 나면 누구와 연결되었는지 주소와 포트번호를 표시한 후, 파일스트림을 이어서 요청을 읽는다.<br>
+  요청을 읽고 나면 Jstrtok()라는 직접 구현한 함수를 활용하여 요청을 파싱한다.<br>
+  그 후 HTTP 버전, 메쏘드, 요청한 파일 이름을 확인한다.<br>
+  이때 요청헤더가 양식에 맞지 않거나 파일명이 없으면 서버 화면에 해당 정보를 띄우고 다시 대기 상태가 된다.<br>
+  만약 요청한 파일을 찾을 수 없으면 <b>error.html</b>문서로 응답해준다
+  <br><br>
+  <div style="text-align: center;">
+    <img src="error.png" alt="parta", width="45%">
+    <br>(error page)
+  </div>
+  <br><br><br>
 
+  <div style="width : 45%; text-align: center; float:left; margin: 10px;">
+    <img src="partb.png" alt="partb", width="100%">
+    <br>Part B
+  </div>
+  <div style="width : 45%; text-align: left ; float:left;">
+    <br>
+    index.html의 화면이다.<br>
+    {주소}:{포트번호}/index.html로 접속 가능하다.(파일 경로를 입력하지 않으면 자동으로 해당 페이지가 뜬다)<br>
+    1. 이미지, 2. 텍스트파일, 3. 보고서, 4. 서버 종료등의 요청을 할 수있다.<br>
+    물론 여기서 선택하지 않아도 주소창에 직접 파일의 경로를쳐서 각종 파일을 요청 할 수 있으며<a href="../server.c">(과제물의 경우 서버 코드까지도 볼 수 있다..)</a>, 존재 하지 않는 파일을 요청하게 되면 에러페이지로 가게 된다.<br>
+    만약 4번을 선택하게 되면 서버가 꺼지기 때문에 다시 키기 전 까진 어떠한 요청도 할 수가 없게 된다<br>
+    
+    <br>자세한 결과물은 <b><a href="../index.html">여기</a></b>서 직접 확인 할 수 있다.
+    <br><br><br>
+  </div>
+  <p></p>
 
-  </p>
-  <hr style="border: solid 1px black; width: 100%;">
-  <h2>사용 방법</h2>
-
-  
-
-</br></br>
+  <p>
   <hr style="border: solid 1px black; width: 100%;">
   <h2>어려웠던 점</h2>
 
+  어려웠던 점이 한, 두 가지가 아니라(사실 지금도 안정적으로 작동하진 않는다) 중요한 몇 개만 선정하여 기술하기로 하였다.</br>
+  <h5>1. 내가 하지 않은 요청</h5>
+  주소창에 주소를 입력하다 보면 아직 주소를 다 치기도 전에 요청이 서버로 들어가곤 했다.</br>
+  브라우저가 웹 서버의 상태를 확인하기 위해 미리 예측해서 보내는 건진 모르겠지만, 해당 요청 때문에 초기엔 서버가 자주 멈췄다.</br>
+  
+  <div style="width : 62%; text-align: center; float:left; margin: 10px;">
+    <img src="emptyrequest.png" alt="empty req", width="70%">
+  </div>
+  <div style="width : 35%; text-align:left ; float:left;">
+    <br><br><br>
+    임시방편으로 빈 요청이 들어오면 우선 아무것도 하지 않게 하니 서버가 멈추진 않았다. 그러다 어차피 웹 서버의 루트를 요청하면 index.html을 표시해야 하기 때문에 요청 파일 이름을 index.html로 강제로 바꾸게 하였다.<br>
+    <br><br><br>
+  </div> 
+
+  <div style="width : 70%; text-align: center;">
+    <img src="redirection.png" alt="redirection", width="100%">
+  </div>
+
+  <br>위에 요청을 보면 빈 URL이 요청이 왔을 때 URL이 비였으니 index.html로 리디렉션 하겠다는 것을 알려주고 있다.<br>
+
+ <h5>2. 이미지 파일 보내기</h5>
+  텍스트파일(html 등)을 전송하는 웹 서버를 만드는것은 어렵지 않았지만, 이미지를 보내려고 하면 제대로 되질 않았다.</br>
+  텍스트 기반의 파일은은 파일스트림에 fputs 써 넣으면 그만이였는데, 이미지 파일은 "rb"로 읽어와 fputs()를 해도 브라우저에서 제대로 표현이 되지 않았다. 
+  무었지 문제인지 도무지 알 수가 없어서 닥치는 대로 HTTP 이미지 전송에 대해 구글링하였지만 대부분 TCP에 관한것이였고 브라우저에 잘 표시되기 위한 방법은 없었다. 
+  그러나 특정 글에서 어째선인지 fputs대신 fputc를 사용하는 것을 보았다.
+  설마 이것 때문인가 하고 fputs을 읽기 버퍼 크기 만큼 반복하는 반복문과 fputc를 사용하여 구현하였더니 이미지가 잘 표시된다.</br>
+  어째서인지는 아직도 잘 모르겠다.</br>
+  
+
+  <h5>3. 쓰레드 구현</h5>
+  사실 쓰레드를 구현하는것은 매우 쉽다. 그럼에도 쓰레드로 구현하는 것을 포기하였는데.
+  이유는 단순하다. 쓰레드로 구현하면 서버의 콘솔창에 박스모양 로그가 예쁘게 남지 않을 것 이기 때문이다.
+  이 때문에 화면을 변화가 있을 때마다 지우고 다시 쓰며 4개의 쓰레드를 2 by 2 박스로 보여주는 것을 생각했지만
+  시험기간이기도 하고 시간이 충분하지 않아서 기각하였다. <br><br>
+  
+  나중에 과제가 끝난 후 시간이 남으면 쓰레드로 구현하고
+  2 by 2, 총 4개의 사각 박스를 표현하며 빈 쓰레드는 [wating., waitng.., waitng...] 이 세개의 문자열이 순차적으로 1초마다 반복되며 가운데에 표시되게 서버 콘솔창을 구현해보고 싶다.
+  <br><br>
+  
+
+  
+  </p>
 
 
-</br></br>
+
+<br><br>
   <hr style="border: solid 1px black; width: 100%;">
   <h2>결론 및 감상</h2>
 
+  처음으로 웹 서버를 구현해보았다.<br>
+  HTTP에서 헤더 부분에 여러 정보가 들어갈것 이란건 어림진작으로 알고 있었지만 이번 과제를 통해 직접 구현해보았기 때문에 구조를 이해하는대 큰 도움이 되었다.<br>
+  특히 응답을 할때 헤더와 바디 사이에 빈 행이 하나 있다는 것은 확실하게 각인되욌다.<br>
+  <br>
+  이 웹서버는 GET 방식에만 응답을 하게 되어 있는데 POST등 다른 방식에도 응답을 할 수 있게 만들지 못해 아쉽다.<br>
+  <br>
+  코드와 커밋 이력은 <a href="https://github.com/Choi-Jongin/CSimpleServer">https://github.com/Choi-Jongin/CSimpleServer </a>여기서 확인 가능하다.
 
 
-</br></br>
-</br></br>
+<br><br>
+<br><br>
   <h6 align = "center">designed by Hanyang in Ansan</h6>
 
 </body>

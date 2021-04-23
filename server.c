@@ -31,7 +31,11 @@ int main(int argc, char *argv[])
     int sockfd, new_fd, port = 3490;
 
     if (argc > 1)
+    {
         port = atoi(argv[1]);
+        if( port == 0 || port < 1024 || port > 65535)
+            printf("wrong port number scope\n");
+    }
     printf("PORT : %d\n", port);
     //my address
     struct sockaddr_in serversock;
@@ -108,18 +112,22 @@ void request_hendler(void *arg)
     clnt_write = fdopen(dup(clnt_sock), "w");
     fgets(req_line, BUFF_SIZE, clnt_read);
 	strcpy(request, req_line);
-    if (strstr(request, "HTTP/") == NULL)
+    
+    if ( strstr(request, "HTTP/") == NULL)
     {
         fclose(clnt_read);
         fclose(clnt_write);
-        perror("Not HTTP");
-        printf("%s\n", matchformat("Not HTTP"));
+        perror(matchformat("Not HTTP or empty request"));
         send(clnt_sock, "ERROR!", (int)strlen("ERROR!"), 0);
         return;
     }
 
     strcpy(method, Jstrtok(req_line, " /"));
     strcpy(file_name, Jstrtok(NULL, " HTTP/"));
+    if( strcmp(file_name,"") == 0  ) {
+        printf("%s\n", matchformat("URL is empty. redirect to root page"));
+        strcpy(file_name, "index.html");
+    }
     strcpy(httpver, Jstrtok(NULL, " "));
     strcpy(ct, content_type(file_name));
 
@@ -340,4 +348,4 @@ char * Jstrtok( char * str, const char * tok )
     }
     strpos = NULL;
     return str;
-} 
+}
